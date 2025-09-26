@@ -15,6 +15,7 @@ class User(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
     email: Mapped[str] = mapped_column(String, nullable=False, unique=True)
+    hashed_password: Mapped[str] = mapped_column(String, nullable=False)
     role: Mapped[str] = mapped_column(String, nullable=False, default="employee")
     team_id: Mapped[int] = mapped_column(ForeignKey("teams.id"))
     meeting_id: Mapped[int] = mapped_column(ForeignKey("meetings.id"))
