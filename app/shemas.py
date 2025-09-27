@@ -8,9 +8,22 @@ class UserCreate(BaseModel):
     role: str = Field(default="employee", pattern="^(employee|manager|leader)$")
 
 
-class User(BaseModel):
+class UserRead(BaseModel):
     id: int
+    name: str
     email: EmailStr
     role: str
+    # teams: list["TeamRead"]
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class TeamCreate(BaseModel):
+    name: str = Field()
+
+
+class TeamRead(BaseModel):
+    id: int
+    name: str
 
     model_config = ConfigDict(from_attributes=True)

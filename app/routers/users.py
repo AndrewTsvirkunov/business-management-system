@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from app.shemas import UserCreate, User as UserSchema
+from app.shemas import UserCreate, UserRead
 from app.models import User as UserModel
 from app.database import get_async_db
 from app.auth import hash_password, verify_password, create_access_token
@@ -12,7 +12,7 @@ from app.auth import hash_password, verify_password, create_access_token
 router = APIRouter(prefix="/users", tags=["users"])
 
 
-@router.post("/auth", response_model=UserSchema, status_code=status.HTTP_201_CREATED)
+@router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
 async def create_user(user: UserCreate, db: AsyncSession = Depends(get_async_db)):
     db_user = UserModel(
         name=user.name,
