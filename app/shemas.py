@@ -1,4 +1,6 @@
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
+from datetime import datetime
+from typing import Optional
 
 
 class UserCreate(BaseModel):
@@ -19,11 +21,95 @@ class UserRead(BaseModel):
 
 
 class TeamCreate(BaseModel):
-    name: str = Field()
+    title: str = Field()
 
 
 class TeamRead(BaseModel):
     id: int
-    name: str
+    title: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class TaskCreate(BaseModel):
+    title: str = Field()
+    description: str = Field()
+    status: str = Field(default="open")
+    deadline: datetime = Field()
+    user_ids: list[int]
+
+
+class TaskRead(BaseModel):
+    id: int
+    title: str
+    description: str
+    status: str
+    deadline: datetime
+    users: list[UserRead]
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class TaskUpdate(BaseModel):
+    title: Optional[str] = Field(None)
+    description: Optional[str] = Field(None)
+    status: Optional[str] = Field(None)
+    deadline: Optional[datetime] = Field(None)
+    user_ids: Optional[list[int]] = Field(None)
+
+
+class MeetingCreate(BaseModel):
+    title: str = Field()
+    scheduled_at: datetime = Field()
+    user_ids: list[int]
+
+
+class MeetingRead(BaseModel):
+    id: int
+    title: str
+    scheduled_at: datetime
+    users: list[UserRead]
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class MeetingUpdate(BaseModel):
+    title: Optional[str] = Field(None)
+    scheduled_at: Optional[datetime] = Field(None)
+    user_ids: Optional[list[int]] = Field(None)
+
+
+class EvaluationCreate(BaseModel):
+    score: int = Field(ge=1, le=5)
+    created_at: datetime = Field()
+    task_id: int
+    user_id: int
+    evaluator_id: int
+
+
+class EvaluationRead(BaseModel):
+    id: int
+    score: int
+    created_at: datetime
+    task_id: int
+    user_id: int
+    evaluator_id: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class TaskCommentCreate(BaseModel):
+    content: str = Field()
+    created_at: datetime = Field()
+    task_id: int
+    user_id: int
+
+
+class TaskCommentRead(BaseModel):
+    id: int
+    content: str
+    created_at: datetime
+    task_id: int
+    user_id: int
 
     model_config = ConfigDict(from_attributes=True)

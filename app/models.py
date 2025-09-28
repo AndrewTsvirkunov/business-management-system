@@ -47,7 +47,7 @@ class Team(Base):
     __tablename__="teams"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(String, nullable=False)
+    title: Mapped[str] = mapped_column(String, nullable=False)
 
     users: Mapped[list["User"]] = relationship("User", secondary="users_teams", back_populates="teams", lazy="selectin")
 
@@ -61,9 +61,9 @@ class Task(Base):
     status: Mapped[str] = mapped_column(String, nullable=False, default="open")
     deadline: Mapped[datetime] = mapped_column(DateTime, nullable=True)
 
-    users: Mapped[list["User"]] = relationship("User", secondary="users_tasks", back_populates="tasks")
-    evaluations: Mapped[list["Evaluation"]] = relationship("Evaluation", back_populates="task")
-    comments: Mapped[list["TaskComment"]] = relationship("TaskComment", back_populates="task")
+    users: Mapped[list["User"]] = relationship("User", secondary="users_tasks", back_populates="tasks", lazy="selectin")
+    evaluations: Mapped[list["Evaluation"]] = relationship("Evaluation", back_populates="task", lazy="selectin")
+    comments: Mapped[list["TaskComment"]] = relationship("TaskComment", back_populates="task", lazy="selectin")
 
 
 class TaskComment(Base):
@@ -75,8 +75,8 @@ class TaskComment(Base):
     task_id: Mapped[int] = mapped_column(ForeignKey("tasks.id"))
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
-    task: Mapped["Task"] = relationship("Task", back_populates="comments")
-    user: Mapped["User"] = relationship("User")
+    task: Mapped["Task"] = relationship("Task", back_populates="comments", lazy="selectin")
+    user: Mapped["User"] = relationship("User", lazy="selectin")
 
 
 class Meeting(Base):
@@ -86,7 +86,7 @@ class Meeting(Base):
     title: Mapped[str] = mapped_column(String, nullable=False)
     scheduled_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
-    users: Mapped[list["User"]] = relationship("User", secondary="users_meetings", back_populates="meetings")
+    users: Mapped[list["User"]] = relationship("User", secondary="users_meetings", back_populates="meetings", lazy="selectin")
 
 
 class Evaluation(Base):
@@ -99,7 +99,7 @@ class Evaluation(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     evaluator_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
-    task: Mapped["Task"] = relationship("Task", back_populates="evaluations")
-    user: Mapped["User"] = relationship("User", foreign_keys=[user_id], back_populates="evaluations")
-    evaluator: Mapped["User"] = relationship("User", foreign_keys=[evaluator_id], back_populates="evaluations_given")
+    task: Mapped["Task"] = relationship("Task", back_populates="evaluations", lazy="selectin")
+    user: Mapped["User"] = relationship("User", foreign_keys=[user_id], back_populates="evaluations", lazy="selectin")
+    evaluator: Mapped["User"] = relationship("User", foreign_keys=[evaluator_id], back_populates="evaluations_given", lazy="selectin")
 

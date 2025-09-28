@@ -11,7 +11,7 @@ router = APIRouter(prefix="/teams", tags=["teams"])
 
 @router.post("/", response_model=TeamRead, status_code=status.HTTP_201_CREATED)
 async def create_team(team: TeamCreate, db: AsyncSession = Depends(get_async_db)):
-    db_team = Team(name=team.name)
+    db_team = Team(title=team.title)
     db.add(db_team)
     await db.commit()
     return db_team
