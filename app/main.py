@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from app.routers import users, teams, tasks, task_comments, meetings, evaluations
+from app.routers import users, teams, tasks, task_comments, meetings, evaluations, calendar
 
 
 app = FastAPI(title="Business management system")
@@ -10,6 +10,7 @@ app.include_router(tasks.router)
 app.include_router(task_comments.router)
 app.include_router(meetings.router)
 app.include_router(evaluations.router)
+app.include_router(calendar.router)
 
 
 @app.get("/", tags=["root"])

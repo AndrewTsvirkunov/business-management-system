@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
-from datetime import datetime
+from datetime import datetime, date
 from typing import Optional
 
 
@@ -22,13 +22,20 @@ class UserRead(BaseModel):
 
 class TeamCreate(BaseModel):
     title: str = Field()
+    user_ids: list[int]
 
 
 class TeamRead(BaseModel):
     id: int
     title: str
+    users: list[UserRead]
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class TeamUpdate(BaseModel):
+    title: Optional[str] = Field(None)
+    user_ids: Optional[list[int]] = Field(None)
 
 
 class TaskCreate(BaseModel):
@@ -113,3 +120,21 @@ class TaskCommentRead(BaseModel):
     user_id: int
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class CalendarItem(BaseModel):
+    type: str
+    id: int
+    title: str
+    dating: datetime
+
+
+class DayCalendar(BaseModel):
+    dating: date
+    items: list[CalendarItem]
+
+
+class MonthCalendar(BaseModel):
+    year: int
+    month: int
+    days: list[DayCalendar]
