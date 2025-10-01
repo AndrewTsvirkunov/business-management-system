@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Оценка поставлена</title>
+</head>
+<body>
+    <h1>Пользователь {{evaluation.user.name }} получил оценку {{evaluation.score}} за задачу {{evaluation.task.title}}</h1>
+    <p>Оценил: {{ evaluation.evaluator.name }}</p>
+    <a href="/evaluations">Вернуться к списку оценок</a>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Встречи</title>
+</head>
+<body>
+    <h1>Список встреч</h1>
+    <a href="/meetings/create">Создать встречу</a>
+    <table border="1" cellpadding="5">
+        <tr>
+            <th>ID</th>
+            <th>Заголовок</th>
+            <th>Время</th>
+            <th>Участники</th>
+            <th>Действия</th>
+        </tr>
+        {% for meeting in meetings %}
+        <tr>
+            <td>{{ meeting.id }}</td>
+            <td>{{ meeting.title }}</td>
+            <td>{{ meeting.scheduled_at }}</td>
+            <td>
+                {% for user in meeting.users %}
+                    {{ user.name }}
+                {% else %}
+                    <i>Нет участников</i>
+                {% endfor %}
+            </td>
+            <td>
+                <a href="/meetings/edit/{{ meeting.id }}">Редактировать</a>
+                <a href="/meetings/delete/{{ meeting.id }}">Удалить</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Оценки</title>
+</head>
+<body>
+    <h1>Список оценок</h1>
+    <a href="/evaluations/create">Поставить оценку</a>
+    <table border="1" cellpadding="5">
+        <tr>
+            <th>ID</th>
+            <th>Score</th>
+            <th>Время</th>
+            <th>Задача</th>
+            <th>Пользователь</th>
+            <th>Оценивающий</th>
+            <th>Действия</th>
+        </tr>
+        {% for evaluation in evaluations %}
+        <tr>
+            <td>{{ evaluation.id }}</td>
+            <td>{{ evaluation.score }}</td>
+            <td>{{ evaluation.created_at }}</td>
+            <td>{{ evaluation.task.title if evaluation.task else "-" }}</td>
+            <td>{{ evaluation.user.name if evaluation.user else "-" }}</td>
+            <td>{{ evaluation.evaluator.name if evaluation.evaluator else "-" }}</td>
+            <td>
+                <a href="/evaluations/edit/{{ evaluation.id }}">Редактировать</a>
+                <a href="/evaluations/delete/{{ evaluation.id }}">Удалить</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

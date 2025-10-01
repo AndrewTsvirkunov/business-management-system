@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Создать встречу</title>
+</head>
+<body>
+    <h1>Создание встречи</h1>
+    <form method="post">
+        <label>Заголовок: <input type="text" name="title"></label><br>
+        <label>Время: <input type="datetime-local" name="scheduled_at"></label><br>
+
+        <h3>Назначить пользователей:</h3>
+        {% for user in users %}
+        <label>
+            <input type="checkbox" name="user_ids" value="{{ user.id }}">
+            {{ user.name }}
+        </label><br>
+        {% endfor %}
+
+        <button type="submit">Создать</button>
+    </form>
+</body>
+</html>

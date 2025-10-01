@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Задача создана</title>
+</head>
+<body>
+    <h1>Задача "{{ task.title }}" создана!</h1>
+    <p>ID: {{ task.id }}</p>
+    <p>Статус: {{ task.status }}</p>
+    <p>Дедлайн: {{ task.deadline }}</p>
+    <p>Назначенные пользователи:</p>
+    <ul>
+        {% for user in users %}
+            <li>{{ user.name }}</li>
+        {% endfor %}
+    </ul>
+    <a href="/tasks/">Вернуться к списку задач</a>
+</body>
+</html>

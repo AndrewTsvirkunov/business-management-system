@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.templating import Jinja2Templates
 
 from app.routers import users, teams, tasks, task_comments, meetings, evaluations, calendar
 from app.admin import init_admin
@@ -6,6 +7,9 @@ from app.config import ADMIN_SECRET_KEY
 
 
 app = FastAPI(title="Business management system")
+
+templates = Jinja2Templates(directory="app/templates")
+
 init_admin(app, secret_key=ADMIN_SECRET_KEY)
 
 app.include_router(users.router)
@@ -17,6 +21,11 @@ app.include_router(evaluations.router)
 app.include_router(calendar.router)
 
 
-@app.get("/", tags=["root"])
-async def root():
-    return {"message": "Добро пожаловать!"}
+# @app.get("/", tags=["root"])
+# async def root():
+#     return {"message": "Добро пожаловать!"}
+
+
+@app.get("/")
+async def index(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})

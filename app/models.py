@@ -62,8 +62,8 @@ class Task(Base):
     deadline: Mapped[datetime] = mapped_column(DateTime, nullable=True)
 
     users: Mapped[list["User"]] = relationship("User", secondary="users_tasks", back_populates="tasks", lazy="selectin")
-    evaluations: Mapped[list["Evaluation"]] = relationship("Evaluation", back_populates="task", lazy="selectin")
-    comments: Mapped[list["TaskComment"]] = relationship("TaskComment", back_populates="task", lazy="selectin")
+    evaluations: Mapped[list["Evaluation"]] = relationship("Evaluation", back_populates="task", lazy="selectin", cascade="all, delete-orphan")
+    comments: Mapped[list["TaskComment"]] = relationship("TaskComment", back_populates="task", lazy="selectin", cascade="all, delete-orphan")
 
 
 class TaskComment(Base):

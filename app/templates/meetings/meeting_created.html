@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Задача назначена</title>
+</head>
+<body>
+    <h1>Встреча "{{ meeting.title }}" назначена!</h1>
+    <p>ID: {{ meeting.id }}</p>
+    <p>Время: {{ meeting.scheduled_at }}</p>
+    <p>Назначенные пользователи:</p>
+    <ul>
+        {% for user in users %}
+            <li>{{ user.name }}</li>
+        {% endfor %}
+    </ul>
+    <a href="/meetings">Вернуться к списку встреч</a>
+</body>
+</html>

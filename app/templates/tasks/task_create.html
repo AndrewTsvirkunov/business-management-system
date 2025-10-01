@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Создать задачу</title>
+</head>
+<body>
+    <h1>Создание задачи</h1>
+    <form method="post">
+        <label>Заголовок: <input type="text" name="title"></label><br>
+        <label>Описание: <textarea name="description"></textarea></label><br>
+        <label>Статус:
+            <select name="task_status">
+                <option value="open">Открыта</option>
+                <option value="in_progress">В работе</option>
+                <option value="done">Завершена</option>
+            </select>
+        </label><br>
+        <label>Дедлайн: <input type="datetime-local" name="deadline"></label>
+
+        <h3>Назначить пользователей:</h3>
+        {% for user in users %}
+        <label>
+            <input type="checkbox" name="user_ids" value="{{ user.id }}">
+            {{ user.name }}
+        </label><br>
+        {% endfor %}
+
+        <button type="submit">Создать</button>
+    </form>
+</body>
+</html>
