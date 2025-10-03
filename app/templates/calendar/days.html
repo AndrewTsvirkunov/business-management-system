@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>День {{ day }}</title>
+</head>
+<body>
+    <h1>События на {{ day }}</h1>
+    {% if items %}
+        <ul>
+        {% for type, title in items %}
+            <li>{{ type }}: {{ title }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p><i>Нет событий</i></p>
+    {% endif %}
+    <p><a href="{{ url_for('month_view', year=day.year, month=day.month) }}">Назад к месяцу</a></p>
+</body>
+</html>

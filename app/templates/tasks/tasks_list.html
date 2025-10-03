@@ -15,9 +15,11 @@
             <th>Статус</th>
             <th>Дедлайн</th>
             <th>Пользователи</th>
+            <th>Комментарии</th>
             <th>Действия</th>
         </tr>
         {% for task in tasks %}
+        {% if current_user in task.users %}
         <tr>
             <td>{{ task.id }}</td>
             <td>{{ task.title }}</td>
@@ -32,10 +34,25 @@
                 {% endfor %}
             </td>
             <td>
-                <a href="/tasks/edit/{{ task.id }}">Редактировать</a>
-                <a href="/tasks/delete/{{ task.id }}">Удалить</a>
+            {% for comment in task.comments %}
+                <ul>
+                    <li>
+                        <b>{{ comment.user.name }}</b>: {{ comment.content }}
+                    </li>
+                </ul>
+            {% else %}
+                <i>Нет комментариев</i>
+            {% endfor %}
+            </td>
+            <td>
+                {% if current_user.role == "manager" %}
+                    <a href="/tasks/edit/{{ task.id }}">Редактировать</a>
+                    <a href="/tasks/delete/{{ task.id }}">Удалить</a>
+                    <a href="/tasks/comment/{{ task.id }}">Комментировать</a>
+                {% endif %}
             </td>
         </tr>
+        {% endif %}
         {% endfor %}
     </table>
 </body>

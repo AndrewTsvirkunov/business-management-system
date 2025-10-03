@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Создать команду</title>
+</head>
+<body>
+    <h1>Создание команды</h1>
+    <form method="post">
+        <label>Название: <input type="text" name="title"></label><br>
+
+        <h3>Назначить участников:</h3>
+        {% for user in users %}
+        <label>
+            <input type="checkbox" name="user_ids" value="{{ user.id }}">
+            {{ user.name }}
+        </label><br>
+        {% endfor %}
+
+        <button type="submit">Создать</button>
+    </form>
+</body>
+</html>

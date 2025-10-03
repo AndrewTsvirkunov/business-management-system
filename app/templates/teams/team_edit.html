@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Редактировать команду</title>
+</head>
+<body>
+    <form method="post">
+        <label>Название:</label><br>
+        <input type="text" name="title" value="{{ team.title }}"><br>
+
+        <label>Участники:</label><br>
+        <select name="user_ids" multiple>
+            {% for user in users %}
+                <option value="{{ user.id }}" {% if user in team.users %}selected{% endif %}>{{ user.name }}</option>
+            {% endfor %}
+        </select><br>
+
+        <button type="submit">Сохранить</button>
+    </form>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Команды</title>
+</head>
+<body>
+    <h1>Список команд</h1>
+    <a href="/teams/create">Создать команду</a>
+    <table border="1" cellpadding="5">
+        <tr>
+            <th>ID</th>
+            <th>Название</th>
+            <th>Участники</th>
+            <th>Действия</th>
+        </tr>
+        {% for team in teams %}
+        <tr>
+            <td>{{ team.id }}</td>
+            <td>{{ team.title }}</td>
+            <td>
+                {% for user in team.users %}
+                    {{ user.name }}
+                {% else %}
+                    <i>Нет назначенных</i>
+                {% endfor %}
+            </td>
+            <td>
+                <a href="/teams/edit/{{ team.id }}">Редактировать</a>
+                <a href="/teams/delete/{{ team.id }}">Удалить</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
