@@ -1,5 +1,8 @@
 import os
 from dotenv import load_dotenv
+from datetime import datetime
+import pytz
+from fastapi.templating import Jinja2Templates
 
 
 load_dotenv()
@@ -17,3 +20,16 @@ ALGORITHM = os.getenv("ALGORITHM")
 ACCESS_TOKEN_EXPIRE_MINUTES=os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
 
 ADMIN_SECRET_KEY = os.getenv("ADMIN_SECRET_KEY")
+
+
+def moscow_now():
+    return datetime.now(pytz.timezone("Europe/Moscow"))
+
+
+def format_moscow(dt: datetime) -> str:
+    tz = pytz.timezone("Europe/Moscow")
+    return dt.astimezone(tz).strftime("%Y-%m-%d %H:%M")
+
+
+templates = Jinja2Templates(directory="app/templates")
+templates.env.filters["moscowtime"] = format_moscow

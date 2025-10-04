@@ -7,76 +7,13 @@ from sqlalchemy import select
 from datetime import datetime
 
 from app.models import Task, User, TaskComment
-from app.shemas import TaskCreate, TaskRead, TaskUpdate
 from app.database import get_async_db
 from app.auth import get_current_manager, get_current_user_or_manager, get_current_user, get_curr_user
+from app.config import templates
 
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
-templates = Jinja2Templates(directory="app/templates")
-
-
-# @router.post("/", response_model=TaskRead, status_code=status.HTTP_201_CREATED)
-# async def create_task(task: TaskCreate, db:AsyncSession = Depends(get_async_db)):
-#     users = []
-#     if task.user_ids:
-#         result = await db.execute(select(User).where(User.id.in_(task.user_ids)))
-#         users = result.scalars().all()
-#
-#     db_task = Task(
-#         title=task.title,
-#         description=task.description,
-#         status=task.status,
-#         deadline=task.deadline,
-#         users=users
-#     )
-#     db.add(db_task)
-#     await db.commit()
-#     return db_task
-#
-#
-# @router.get("/{task_id}", response_model=TaskRead)
-# async def get_task_info(task_id: int, db: AsyncSession = Depends(get_async_db)):
-#     task = await db.get(Task, task_id)
-#     if not task:
-#         raise HTTPException(status_code=404, detail="Task not found")
-#     return task
-#
-#
-# @router.delete("/{task_id}", response_model=TaskRead)
-# async def delete_task(task_id: int, db: AsyncSession = Depends(get_async_db)):
-#     task = await db.get(Task, task_id)
-#     if not task:
-#         raise HTTPException(status_code=404, detail="Task not found")
-#     await db.delete(task)
-#     await db.commit()
-#     return {"message": f"Task {task_id} deleted"}
-#
-#
-# @router.patch("/{task_id}", response_model=TaskRead)
-# async def update_task(task_id: int, task: TaskUpdate, db: AsyncSession = Depends(get_async_db)):
-#     db_task = await db.get(Task, task_id)
-#     if not db_task:
-#         raise HTTPException(status_code=404, detail="Task not found")
-#
-#     update_data = task.model_dump(exclude_unset=True)
-#
-#     if "user_ids" in update_data:
-#         user_ids = update_data.pop("user_ids")
-#         if user_ids is not None:
-#             result = await db.execute(select(User).where(User.id.in_(user_ids)))
-#             users = result.scalars().all()
-#             db_task.users = users
-#
-#     for field, value in update_data.items():
-#         setattr(db_task, field, value)
-#
-#     await db.commit()
-#     return db_task
-
-
-# ---------------------------------------------------------------------
 
 @router.get("/")
 async def tasks_list(request: Request, db: AsyncSession = Depends(get_async_db),
@@ -114,6 +51,7 @@ async def task_create(
         task_status: str = Form("open"),
         deadline: str = Form(...),
         user_ids: list[int] = Form([]),
+        team_id: int | None = Form(None),
         first_comment: str = Form(...),
         db: AsyncSession = Depends(get_async_db),
         current_user: User = Depends(get_curr_user)
@@ -122,6 +60,9 @@ async def task_create(
 
     result = await db.execute(select(User).where(User.id.in_(user_ids)))
     users = result.scalars().all()
+
+    if current_user.role == "manager":
+
 
     task = Task(title=title, description=description, status=task_status, deadline=deadline_dt, users=users)
 
@@ -171,7 +112,9 @@ async def task_edit(
         db: AsyncSession = Depends(get_async_db),
         current_user: User = Depends(get_curr_user)
 ):
-    task = await db.get(Task, task_id)
+    result_task = await db.execute(
+        select(Task).options(selectinload(Task.users)).where(Task.id == task_id))
+    task = result_task.scalars().first()
 
     if task.id != current_user.id and current_user.role != "manager":
         raise HTTPException(status_code=403, detail="Нет доступа")

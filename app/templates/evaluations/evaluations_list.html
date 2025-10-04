@@ -21,7 +21,7 @@
         <tr>
             <td>{{ evaluation.id }}</td>
             <td>{{ evaluation.score }}</td>
-            <td>{{ evaluation.created_at }}</td>
+            <td>{{ evaluation.created_at|moscowtime }}</td>
             <td>{{ evaluation.task.title if evaluation.task else "-" }}</td>
             <td>{{ evaluation.user.name if evaluation.user else "-" }}</td>
             <td>{{ evaluation.evaluator.name if evaluation.evaluator else "-" }}</td>

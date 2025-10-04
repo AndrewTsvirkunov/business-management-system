@@ -10,7 +10,7 @@
         <input type="text" name="title" value="{{ meeting.title }}"><br>
 
         <label>Время:</label><br>
-        <input type="datetime-local" name="scheduled_at" value="{{ meeting.scheduled_at }}"><br>
+        <input type="datetime-local" name="scheduled_at" value="{{ meeting.scheduled_at|moscowtime }}"><br>
 
         <label>Участники:</label><br>
         <select name="user_ids" multiple>

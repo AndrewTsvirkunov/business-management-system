@@ -20,7 +20,7 @@
         </select><br>
 
         <label>Дедлайн:</label><br>
-        <input type="datetime-local" name="deadline" value="{{ task.deadline }}"><br>
+        <input type="datetime-local" name="deadline" value="{{ task.deadline|moscowtime }}"><br>
 
         <label>Пользователи:</label><br>
         <select name="user_ids" multiple>
