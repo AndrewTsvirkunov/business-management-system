@@ -6,7 +6,7 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy import select
 from datetime import datetime
 
-from app.models import Task, User, TaskComment
+from app.models import Task, User, TaskComment, Team
 from app.database import get_async_db
 from app.auth import get_current_manager, get_current_user_or_manager, get_current_user, get_curr_user
 from app.config import templates
@@ -18,13 +18,37 @@ router = APIRouter(prefix="/tasks", tags=["tasks"])
 @router.get("/")
 async def tasks_list(request: Request, db: AsyncSession = Depends(get_async_db),
                      current_user: User = Depends(get_curr_user)):
-    result = await db.execute(
-        select(Task).options(
-            selectinload(Task.users),
-            selectinload(Task.comments)
+    if current_user.role == "admin":
+        result = await db.execute(
+            select(Task)
+            .options(selectinload(Task.users), selectinload(Task.comments))
         )
-    )
-    tasks = result.scalars().all()
+        tasks = result.scalars().all()
+
+    elif current_user.role == "manager":
+        result_teams = await db.execute(
+            select(Team.id).where(Team.manager_id == current_user.id)
+        )
+        team_ids = result_teams.scalars().all()
+
+        if team_ids:
+            result = await db.execute(
+                select(Task)
+                .options(selectinload(Task.users), selectinload(Task.comments))
+                .where(Task.users.any(User.teams.any(Team.id.in_(team_ids))))
+            )
+            tasks = result.scalars().all()
+        else:
+            tasks = []
+
+    else:
+        result = await db.execute(
+            select(Task)
+            .options(selectinload(Task.users), selectinload(Task.comments))
+            .where(Task.users.any(User.id == current_user.id))
+        )
+        tasks = result.scalars().all()
+
     return templates.TemplateResponse(
         "tasks/tasks_list.html",
         {"request": request, "tasks": tasks, "current_user": current_user}
@@ -34,8 +58,17 @@ async def tasks_list(request: Request, db: AsyncSession = Depends(get_async_db),
 @router.get("/create")
 async def task_create_form(request: Request, db: AsyncSession = Depends(get_async_db),
                            current_user: User = Depends(get_curr_user)):
-    result_users = await db.execute(select(User))
-    users = result_users.scalars().all()
+    if current_user.role == "user":
+        raise HTTPException(status_code=403, detail="User не может создавать задачу")
+
+    if current_user.role == "admin":
+        result_users = await db.execute(select(User))
+        users = result_users.scalars().all()
+
+    elif current_user.role == "manager":
+        result_users = await db.execute(
+            select(User).where(User.teams.any(Team.manager_id == current_user.id)))
+        users = result_users.scalars().all()
 
     return templates.TemplateResponse(
         "tasks/task_create.html",
@@ -51,18 +84,26 @@ async def task_create(
         task_status: str = Form("open"),
         deadline: str = Form(...),
         user_ids: list[int] = Form([]),
-        team_id: int | None = Form(None),
         first_comment: str = Form(...),
         db: AsyncSession = Depends(get_async_db),
         current_user: User = Depends(get_curr_user)
 ):
+    if current_user.role == "user":
+        raise HTTPException(status_code=403, detail="User не может создавать задачу")
+
     deadline_dt = datetime.fromisoformat(deadline)
 
-    result = await db.execute(select(User).where(User.id.in_(user_ids)))
-    users = result.scalars().all()
+    if current_user.role == "admin":
+        result = await db.execute(select(User).where(User.id.in_(user_ids)))
+        users = result.scalars().all()
 
-    if current_user.role == "manager":
-
+    elif current_user.role == "manager":
+        result = await db.execute(
+            select(User)
+            .where(User.id.in_(user_ids))
+            .where(User.teams.any(Team.manager_id == current_user.id))
+        )
+        users = result.scalars().all()
 
     task = Task(title=title, description=description, status=task_status, deadline=deadline_dt, users=users)
 
@@ -88,8 +129,8 @@ async def task_edit_form(request: Request, task_id: int, db: AsyncSession = Depe
     )
     task = result_task.scalars().first()
 
-    if task.id != current_user.id and current_user.role != "manager":
-        raise HTTPException(status_code=403, detail="Нет доступа")
+    if current_user.role != "admin" and current_user not in task.users and current_user.role != "manager":
+        raise HTTPException(status_code=403, detail="У вас нет доступа к этой задаче")
 
     result_users = await db.execute(select(User))
     users = result_users.scalars().all()
@@ -116,8 +157,8 @@ async def task_edit(
         select(Task).options(selectinload(Task.users)).where(Task.id == task_id))
     task = result_task.scalars().first()
 
-    if task.id != current_user.id and current_user.role != "manager":
-        raise HTTPException(status_code=403, detail="Нет доступа")
+    if current_user.role != "admin" and current_user not in task.users and current_user.role != "manager":
+        raise HTTPException(status_code=403, detail="У вас нет доступа к этой задаче")
 
     task.title = title
     task.description = description
@@ -132,8 +173,13 @@ async def task_edit(
 
 
 @router.get("/delete/{task_id}")
-async def task_delete(task_id: int, db: AsyncSession = Depends(get_async_db)):
+async def task_delete(task_id: int, db: AsyncSession = Depends(get_async_db),
+                      current_user: User = Depends(get_curr_user)):
     task = await db.get(Task, task_id)
+
+    if current_user.role != "admin" and current_user not in task.users and current_user.role != "manager":
+        raise HTTPException(status_code=403, detail="У вас нет доступа к этой задаче")
+
     await db.delete(task)
     await db.commit()
     return HTMLResponse(f"Задача {task.title} удалена")

@@ -6,7 +6,9 @@
 </head>
 <body>
     <h1>Список задач</h1>
-    <a href="/tasks/create">Создать задачу</a><br>
+    {% if current_user.role != "user" %}
+        <a href="/tasks/create">Создать задачу</a><br>
+    {% endif %}
     <table border="1" cellpadding="5">
         <tr>
             <th>ID</th>
@@ -16,10 +18,11 @@
             <th>Дедлайн</th>
             <th>Пользователи</th>
             <th>Комментарии</th>
-            <th>Действия</th>
+            {% if current_user.role != "user" %}
+                <th>Действия</th>
+            {% endif %}
         </tr>
         {% for task in tasks %}
-        {% if current_user in task.users %}
         <tr>
             <td>{{ task.id }}</td>
             <td>{{ task.title }}</td>
@@ -45,14 +48,11 @@
             {% endfor %}
             </td>
             <td>
-                {% if current_user.role == "manager" %}
-                    <a href="/tasks/edit/{{ task.id }}">Редактировать</a>
-                    <a href="/tasks/delete/{{ task.id }}">Удалить</a>
-                    <a href="/tasks/comment/{{ task.id }}">Комментировать</a>
-                {% endif %}
+                <a href="/tasks/edit/{{ task.id }}">Редактировать</a>
+                <a href="/tasks/delete/{{ task.id }}">Удалить</a>
+                <a href="/tasks/comment/{{ task.id }}">Комментировать</a>
             </td>
         </tr>
-        {% endif %}
         {% endfor %}
     </table>
 </body>

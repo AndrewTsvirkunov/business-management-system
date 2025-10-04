@@ -20,12 +20,6 @@
                 <option value="{{ user.name }}">{{ user.name }}</option>
             {% endfor %}
         </select><br>
-        <label>Оценивающий:</label><br>
-        <select name="evaluator_name">
-            {% for user in users %}
-                <option value="{{ user.name }}">{{ user.name }}</option>
-            {% endfor %}
-        </select>
 
         <button type="submit">Поставить оценку</button>
     </form>

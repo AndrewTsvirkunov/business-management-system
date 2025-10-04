@@ -11,6 +11,7 @@
         <tr>
             <th>ID</th>
             <th>Название</th>
+            <th>Менеджер</th>
             <th>Участники</th>
             <th>Действия</th>
         </tr>
@@ -18,6 +19,13 @@
         <tr>
             <td>{{ team.id }}</td>
             <td>{{ team.title }}</td>
+            <td>
+                {% if team.manager_id %}
+                    {{ team.manager.name }}
+                {% else %}
+                    <i>Нет менеджера</i>
+                {% endif %}
+            </td>
             <td>
                 {% for user in team.users %}
                     {{ user.name }}

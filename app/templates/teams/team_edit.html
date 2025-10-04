@@ -9,6 +9,18 @@
         <label>Название:</label><br>
         <input type="text" name="title" value="{{ team.title }}"><br>
 
+        <label>Менеджер:</label><br>
+        <select name="manager_id">
+            <option value="">— Нет —</option>
+            {% for user in users %}
+                {% if user.role == "manager" %}
+                    <option value="{{ user.id }}" {% if team.manager and user.id == team.manager.id %}selected{% endif %}>
+                        {{ user.name }}
+                    </option>
+                {% endif %}
+            {% endfor %}
+        </select><br>
+
         <label>Участники:</label><br>
         <select name="user_ids" multiple>
             {% for user in users %}

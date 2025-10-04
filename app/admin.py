@@ -31,7 +31,7 @@ class AdminAuth(AuthenticationBackend):
             if not verify_password(password, user.hashed_password):
                 return False
 
-            if user.role not in ("leader",):
+            if user.role != "admin":
                 return False
 
             request.session.update({"admin_user_id": user.id})

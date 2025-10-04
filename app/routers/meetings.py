@@ -46,6 +46,19 @@ async def meeting_create(
 ):
     scheduled_at_dt = datetime.fromisoformat(scheduled_at)
 
+    conflict = await db.execute(
+        select(Meeting)
+        .join(Meeting.users)
+        .where(Meeting.scheduled_at == scheduled_at_dt, User.id.in_(user_ids))
+    )
+    conflict_meeting = conflict.scalars().first()
+    if conflict_meeting:
+        return HTMLResponse(
+            content=f"<h3 style='color:red;'>Ошибка:</h3>"
+                    f"<p>Один из пользователей уже занят на встрече '{conflict_meeting.title}' в это время</p>",
+            status_code=400
+        )
+
     result = await db.execute(select(User).where(User.id.in_(user_ids)))
     users = result.scalars().all()
 
@@ -81,6 +94,19 @@ async def meeting_edit(
         db: AsyncSession = Depends(get_async_db)
 ):
     scheduled_at_dt = datetime.fromisoformat(scheduled_at)
+
+    conflict = await db.execute(
+        select(Meeting)
+        .join(Meeting.users)
+        .where(Meeting.scheduled_at == scheduled_at_dt, User.id.in_(user_ids))
+    )
+    conflict_meeting = conflict.scalars().first()
+    if conflict_meeting:
+        return HTMLResponse(
+            content=f"<h3 style='color:red;'>Ошибка:</h3>"
+                    f"<p>Один из пользователей уже занят на встрече '{conflict_meeting.title}' в это время</p>",
+            status_code=400
+        )
 
     meeting = await db.get(Meeting, meeting_id)
 

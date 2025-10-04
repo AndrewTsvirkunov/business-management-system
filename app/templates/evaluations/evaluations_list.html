@@ -6,7 +6,9 @@
 </head>
 <body>
     <h1>Список оценок</h1>
-    <a href="/evaluations/create">Поставить оценку</a>
+    {% if current_user.role != "user" %}
+        <a href="/evaluations/create">Поставить оценку</a>
+    {% endif %}
     <table border="1" cellpadding="5">
         <tr>
             <th>ID</th>
@@ -15,7 +17,9 @@
             <th>Задача</th>
             <th>Пользователь</th>
             <th>Оценивающий</th>
-            <th>Действия</th>
+            {% if current_user.role != "user" %}
+                <th>Действия</th>
+            {% endif %}
         </tr>
         {% for evaluation in evaluations %}
         <tr>
@@ -25,10 +29,12 @@
             <td>{{ evaluation.task.title if evaluation.task else "-" }}</td>
             <td>{{ evaluation.user.name if evaluation.user else "-" }}</td>
             <td>{{ evaluation.evaluator.name if evaluation.evaluator else "-" }}</td>
+            {% if current_user.role != "user" %}
             <td>
                 <a href="/evaluations/edit/{{ evaluation.id }}">Редактировать</a>
                 <a href="/evaluations/delete/{{ evaluation.id }}">Удалить</a>
             </td>
+            {% endif %}
         </tr>
         {% endfor %}
     </table>

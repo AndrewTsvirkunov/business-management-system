@@ -59,7 +59,9 @@ class Team(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     title: Mapped[str] = mapped_column(String, nullable=False)
+    manager_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True)
 
+    manager: Mapped["User"] = relationship("User", lazy="selectin")
     users: Mapped[list["User"]] = relationship(
         "User", secondary="users_teams", back_populates="teams", lazy="selectin"
     )

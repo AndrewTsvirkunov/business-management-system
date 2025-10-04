@@ -13,18 +13,10 @@
         <p>{{ evaluation.task.title }}</p>
 
         <label>Пользователь:</label><br>
-        <select name="user_name">
-            {% for user in users %}
-                <option value="{{ user.name }}" {% if user == evaluation.user %}selected{% endif %}>{{ user.name }}</option>
-            {% endfor %}
-        </select><br>
+        <p>{{ evaluation.user.name }}</p>
 
         <label>Оценивающий:</label><br>
-        <select name="evaluator_name">
-            {% for user in users %}
-                <option value="{{ user.name }}" {% if user == evaluation.evaluator %}selected{% endif %}>{{ user.name }}</option>
-            {% endfor %}
-        </select><br>
+        <p>{{ evaluation.evaluator.name }}</p>
 
         <button type="submit">Сохранить</button>
     </form>

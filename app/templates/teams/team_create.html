@@ -9,6 +9,16 @@
     <form method="post">
         <label>Название: <input type="text" name="title"></label><br>
 
+        <h3>Назначить менеджера:</h3>
+        <select name="manager_id">
+            <option value="">— Нет —</option>
+            {% for user in users %}
+                {% if user.role == "manager" %}
+                    <option value="{{ user.id }}">{{ user.name }}</option>
+                {% endif %}
+            {% endfor %}
+        </select><br>
+
         <h3>Назначить участников:</h3>
         {% for user in users %}
         <label>
