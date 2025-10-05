@@ -9,15 +9,13 @@
     <a href="/meetings/create">Создать встречу</a>
     <table border="1" cellpadding="5">
         <tr>
-            <th>ID</th>
-            <th>Заголовок</th>
+            <th>Встреча</th>
             <th>Время</th>
             <th>Участники</th>
             <th>Действия</th>
         </tr>
         {% for meeting in meetings %}
         <tr>
-            <td>{{ meeting.id }}</td>
             <td>{{ meeting.title }}</td>
             <td>{{ meeting.scheduled_at|moscowtime }}</td>
             <td>
@@ -34,5 +32,6 @@
         </tr>
         {% endfor %}
     </table>
+    <a href="/">На главную</a>
 </body>
 </html>

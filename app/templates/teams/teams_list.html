@@ -9,15 +9,13 @@
     <a href="/teams/create">Создать команду</a>
     <table border="1" cellpadding="5">
         <tr>
-            <th>ID</th>
-            <th>Название</th>
+            <th>Команда</th>
             <th>Менеджер</th>
             <th>Участники</th>
             <th>Действия</th>
         </tr>
         {% for team in teams %}
         <tr>
-            <td>{{ team.id }}</td>
             <td>{{ team.title }}</td>
             <td>
                 {% if team.manager_id %}
@@ -40,5 +38,6 @@
         </tr>
         {% endfor %}
     </table>
+    <a href="/">На главную</a>
 </body>
 </html>

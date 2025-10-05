@@ -53,6 +53,9 @@ class User(Base):
         "Evaluation", foreign_keys="Evaluation.evaluator_id", back_populates="evaluator", lazy="selectin"
     )
 
+    def __str__(self):
+        return self.name
+
 
 class Team(Base):
     __tablename__="teams"
@@ -85,6 +88,9 @@ class Task(Base):
     comments: Mapped[list["TaskComment"]] = relationship(
         "TaskComment", back_populates="task", lazy="selectin", cascade="all, delete-orphan"
     )
+
+    def __str__(self):
+        return self.title
 
 
 class TaskComment(Base):

@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, Request
-from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from datetime import date
 from sqlalchemy.ext.asyncio import AsyncSession

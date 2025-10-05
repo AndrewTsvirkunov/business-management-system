@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, status, HTTPException, Request, Form
-from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -8,7 +7,7 @@ from datetime import datetime
 
 from app.models import Task, User, TaskComment, Team
 from app.database import get_async_db
-from app.auth import get_current_manager, get_current_user_or_manager, get_current_user, get_curr_user
+from app.auth import get_current_user
 from app.config import templates
 
 
@@ -17,7 +16,7 @@ router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 @router.get("/")
 async def tasks_list(request: Request, db: AsyncSession = Depends(get_async_db),
-                     current_user: User = Depends(get_curr_user)):
+                     current_user: User = Depends(get_current_user)):
     if current_user.role == "admin":
         result = await db.execute(
             select(Task)
@@ -57,7 +56,7 @@ async def tasks_list(request: Request, db: AsyncSession = Depends(get_async_db),
 
 @router.get("/create")
 async def task_create_form(request: Request, db: AsyncSession = Depends(get_async_db),
-                           current_user: User = Depends(get_curr_user)):
+                           current_user: User = Depends(get_current_user)):
     if current_user.role == "user":
         raise HTTPException(status_code=403, detail="User не может создавать задачу")
 
@@ -86,7 +85,7 @@ async def task_create(
         user_ids: list[int] = Form([]),
         first_comment: str = Form(...),
         db: AsyncSession = Depends(get_async_db),
-        current_user: User = Depends(get_curr_user)
+        current_user: User = Depends(get_current_user)
 ):
     if current_user.role == "user":
         raise HTTPException(status_code=403, detail="User не может создавать задачу")
@@ -123,7 +122,7 @@ async def task_create(
 
 @router.get("/edit/{task_id}")
 async def task_edit_form(request: Request, task_id: int, db: AsyncSession = Depends(get_async_db),
-                         current_user: User = Depends(get_curr_user)):
+                         current_user: User = Depends(get_current_user)):
     result_task = await db.execute(
         select(Task).options(selectinload(Task.users)).where(Task.id == task_id)
     )
@@ -151,7 +150,7 @@ async def task_edit(
         deadline: str = Form(...),
         user_ids: list[int] = Form([]),
         db: AsyncSession = Depends(get_async_db),
-        current_user: User = Depends(get_curr_user)
+        current_user: User = Depends(get_current_user)
 ):
     result_task = await db.execute(
         select(Task).options(selectinload(Task.users)).where(Task.id == task_id))
@@ -174,7 +173,7 @@ async def task_edit(
 
 @router.get("/delete/{task_id}")
 async def task_delete(task_id: int, db: AsyncSession = Depends(get_async_db),
-                      current_user: User = Depends(get_curr_user)):
+                      current_user: User = Depends(get_current_user)):
     task = await db.get(Task, task_id)
 
     if current_user.role != "admin" and current_user not in task.users and current_user.role != "manager":
@@ -198,7 +197,7 @@ async def add_comment(
         task_id: int,
         content: str = Form(...),
         db: AsyncSession = Depends(get_async_db),
-        current_user: User = Depends(get_curr_user)
+        current_user: User = Depends(get_current_user)
 ):
     comment = TaskComment(content=content, task_id=task_id, user_id=current_user.id)
     db.add(comment)

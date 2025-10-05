@@ -1,15 +1,15 @@
 from fastapi import FastAPI, Request
-from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 from datetime import date
 
 from app.routers import users, teams, tasks, meetings, evaluations, calendar, login
 from app.admin import init_admin
-from app.config import ADMIN_SECRET_KEY
+from app.config import ADMIN_SECRET_KEY, templates
 
 
 app = FastAPI(title="Business management system")
 
-templates = Jinja2Templates(directory="app/templates")
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 init_admin(app, secret_key=ADMIN_SECRET_KEY)
 

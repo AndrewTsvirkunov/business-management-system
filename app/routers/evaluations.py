@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, status, HTTPException, Request, Form
-from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -9,7 +8,7 @@ from datetime import datetime
 from app.models import Evaluation, User, Task, Team
 from app.database import get_async_db
 from app.config import templates
-from app.auth import get_curr_user
+from app.auth import get_current_user
 
 
 router = APIRouter(prefix="/evaluations", tags=["evaluations"])
@@ -17,7 +16,7 @@ router = APIRouter(prefix="/evaluations", tags=["evaluations"])
 
 @router.get("/")
 async def evaluations_list(request: Request, db: AsyncSession = Depends(get_async_db),
-                           current_user: User = Depends(get_curr_user)):
+                           current_user: User = Depends(get_current_user)):
     if current_user.role == "admin":
         result = await db.execute(
             select(Evaluation).options(
@@ -68,7 +67,7 @@ async def evaluations_list(request: Request, db: AsyncSession = Depends(get_asyn
 
 @router.get("/create")
 async def evaluation_create_form(request: Request, db: AsyncSession = Depends(get_async_db),
-                                 current_user: User = Depends(get_curr_user)):
+                                 current_user: User = Depends(get_current_user)):
     result_tasks = await db.execute(select(Task))
     tasks = result_tasks.scalars().all()
 
@@ -99,7 +98,7 @@ async def evaluation_created(
         user_name: str = Form(...),
         # evaluator_name: str = Form(...),
         db: AsyncSession = Depends(get_async_db),
-        current_user: User = Depends(get_curr_user)
+        current_user: User = Depends(get_current_user)
 ):
     result_task = await db.execute(select(Task).where(Task.title == task_title))
     task = result_task.scalars().first()

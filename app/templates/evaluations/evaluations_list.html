@@ -11,24 +11,20 @@
     {% endif %}
     <table border="1" cellpadding="5">
         <tr>
-            <th>ID</th>
-            <th>Score</th>
-            <th>Время</th>
             <th>Задача</th>
             <th>Пользователь</th>
             <th>Оценивающий</th>
+            <th>Оценка</th>
             {% if current_user.role != "user" %}
                 <th>Действия</th>
             {% endif %}
         </tr>
         {% for evaluation in evaluations %}
         <tr>
-            <td>{{ evaluation.id }}</td>
-            <td>{{ evaluation.score }}</td>
-            <td>{{ evaluation.created_at|moscowtime }}</td>
             <td>{{ evaluation.task.title if evaluation.task else "-" }}</td>
             <td>{{ evaluation.user.name if evaluation.user else "-" }}</td>
             <td>{{ evaluation.evaluator.name if evaluation.evaluator else "-" }}</td>
+            <td>{{ evaluation.score }}</td>
             {% if current_user.role != "user" %}
             <td>
                 <a href="/evaluations/edit/{{ evaluation.id }}">Редактировать</a>
@@ -38,5 +34,6 @@
         </tr>
         {% endfor %}
     </table>
+    <a href="/">На главную</a>
 </body>
 </html>

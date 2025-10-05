@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, status, HTTPException, Request, Form
-from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse, HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -8,7 +7,7 @@ from sqlalchemy import select
 from app.database import get_async_db
 from app.models import Team, User
 from app.config import templates
-from app.auth import get_curr_user
+from app.auth import get_current_user
 
 
 router = APIRouter(prefix="/teams", tags=["teams"])
@@ -28,7 +27,7 @@ async def teams_list(request: Request, db: AsyncSession = Depends(get_async_db))
 
 @router.get("/create")
 async def team_create_form(request: Request, db: AsyncSession = Depends(get_async_db),
-                           current_user: User = Depends(get_curr_user)):
+                           current_user: User = Depends(get_current_user)):
     if current_user.role != "admin":
         return HTMLResponse("Только admin может создавать команды", status_code=403)
     result = await db.execute(select(User))
@@ -44,7 +43,7 @@ async def team_create(
         request: Request,
         title: str = Form(...),
         user_ids: list[int] = Form([]),
-        manager_id: int|None = Form(None),
+        manager_id: int|None = None,
         db: AsyncSession = Depends(get_async_db)
 ):
     result = await db.execute(select(User).where(User.id.in_(user_ids)))
@@ -59,7 +58,10 @@ async def team_create(
 
     db.add(team)
     await db.commit()
-    return RedirectResponse(url="/teams", status_code=status.HTTP_303_SEE_OTHER)
+    return templates.TemplateResponse(
+        "teams/team_created.html",
+        {"request": request, "team": team}
+    )
 
 
 @router.get("/edit/{team_id}")
@@ -81,7 +83,7 @@ async def team_edit(
         team_id: int,
         title: str = Form(...),
         user_ids: list[int] = Form([]),
-        manager_id: int|None = Form(None),
+        manager_id: int|None = None,
         db: AsyncSession = Depends(get_async_db)
 ):
     team = await db.get(Team, team_id)

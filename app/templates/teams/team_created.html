@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Команда создана</title>
+</head>
+<body>
+    <h1>Команда {{ team.title }} создана!</h1>
+    {% if team.manager_id %}
+        <p>Менеджер: {{ team.manager.name }}</p>
+    {% endif %}
+    <p>Участники:</p>
+    <ul>
+    {% for user in team.users %}
+        <li>{{ user.name }}</li>
+    {% endfor %}
+    </ul>
+    <a href="/teams/">Вернуться к списку команд</a>
+</body>
+</html>

@@ -11,20 +11,16 @@
     {% endif %}
     <table border="1" cellpadding="5">
         <tr>
-            <th>ID</th>
-            <th>Заголовок</th>
+            <th>Задача</th>
             <th>Описание</th>
             <th>Статус</th>
             <th>Дедлайн</th>
-            <th>Пользователи</th>
+            <th>Назначенные</th>
             <th>Комментарии</th>
-            {% if current_user.role != "user" %}
-                <th>Действия</th>
-            {% endif %}
+            <th>Действия</th>
         </tr>
         {% for task in tasks %}
         <tr>
-            <td>{{ task.id }}</td>
             <td>{{ task.title }}</td>
             <td>{{ task.description }}</td>
             <td>{{ task.status }}</td>
@@ -55,5 +51,6 @@
         </tr>
         {% endfor %}
     </table>
+    <a href="/">На главную</a>
 </body>
 </html>

@@ -4,10 +4,11 @@ from fastapi import FastAPI
 from sqlalchemy import select
 from sqladmin import Admin, ModelView
 from sqladmin.authentication import AuthenticationBackend
+from wtforms import PasswordField
 
 from app.database import engine, async_session
 from app.models import User, Team, Task, TaskComment, Meeting, Evaluation
-from app.auth import verify_password
+from app.auth import verify_password, hash_password
 
 
 class AdminAuth(AuthenticationBackend):
@@ -63,12 +64,22 @@ class BaseAdmin(ModelView):
 class UserAdmin(BaseAdmin, model=User):
     column_list = [User.id, User.name, User.email, User.role]
     column_searchable_list = [User.name, User.email]
-    form_columns = [User.name, User.email, User.role, User.hashed_password]
+    form_columns = [User.name, User.email, User.role]
+
+    async def scaffold_form(self, *args, **kwargs):
+        form_class = await super().scaffold_form(*args, **kwargs)
+        form_class.password = PasswordField("Пароль")
+        return form_class
+
+    async def on_model_change(self, form, model, is_created, request):
+        password = form.get("password")
+        if password:
+            model.hashed_password = hash_password(password)
 
 
 class TeamAdmin(BaseAdmin, model=Team):
     column_list = [Team.id, Team.title]
-    form_columns = [Team.title, Team.users]
+    form_columns = [Team.title, Team.manager, Team.users]
 
 
 class TaskAdmin(BaseAdmin, model=Task):
@@ -79,7 +90,7 @@ class TaskAdmin(BaseAdmin, model=Task):
 
 class TaskCommentAdmin(BaseAdmin, model=TaskComment):
     column_list = [TaskComment.id, TaskComment.content, TaskComment.created_at, TaskComment.task_id, TaskComment.user_id]
-    form_columns = [TaskComment.content, TaskComment.task_id, TaskComment.user_id]
+    form_columns = [TaskComment.content, TaskComment.task, TaskComment.user]
 
 
 class MeetingAdmin(BaseAdmin, model=Meeting):
@@ -90,7 +101,7 @@ class MeetingAdmin(BaseAdmin, model=Meeting):
 class EvaluationAdmin(BaseAdmin, model=Evaluation):
     column_list = [Evaluation.id, Evaluation.score, Evaluation.created_at,
                    Evaluation.task_id, Evaluation.user_id, Evaluation.evaluator_id]
-    form_columns = [Evaluation.score, Evaluation.task_id, Evaluation.user_id, Evaluation.evaluator_id]
+    form_columns = [Evaluation.score, Evaluation.task, Evaluation.user, Evaluation.evaluator]
 
 
 def init_admin(app: FastAPI, secret_key: str):

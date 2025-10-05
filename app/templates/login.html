@@ -3,15 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <title>Вход</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/login.css') }}">
 </head>
 <body>
-    <h2>Авторизация</h2>
-    <form method="post" action="/auth/login">
-        <label>Email:</label><br>
-        <input type="text" name="username"><br>
-        <label>Пароль:</label><br>
-        <input type="password" name="password"><br>
-        <button type="submit">Войти</button>
-    </form>
+    <div class="container">
+        <div class="card">
+            <h2>Вход</h2>
+
+            {% if error %}
+                <div class="error">{{ error }}</div>
+            {% endif %}
+
+            <form method="post" action="/auth/login">
+                <label>Email:</label><br>
+                <input type="text" name="username"><br>
+                <label>Пароль:</label><br>
+                <input type="password" name="password"><br>
+                <button type="submit">Войти</button>
+            </form>
+        </div>
+    </div>
 </body>
 </html>
