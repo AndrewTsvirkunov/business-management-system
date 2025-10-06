@@ -23,6 +23,7 @@ async def day_view(request: Request, day: date, db: AsyncSession = Depends(get_a
     items = [("Задача", t.title) for t in tasks] + [("Встреча", m.title) for m in meetings]
 
     return templates.TemplateResponse(
+        request,
         "calendar/days.html",
         {"request": request, "day": day, "items": items}
     )
@@ -55,6 +56,7 @@ async def month_view(request: Request, year: int, month: int, db: AsyncSession =
         days.setdefault(m.scheduled_at.date(), []).append(("Встреча", m.title))
 
     return templates.TemplateResponse(
+        request,
         "calendar/months.html",
         {"request": request, "year": year, "month": month, "days": days, "days_in_month": days_in_month, "date": date}
     )

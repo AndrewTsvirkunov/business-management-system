@@ -20,6 +20,7 @@ async def meetings_list(request: Request, db: AsyncSession = Depends(get_async_d
     )
     meetings = result.scalars().all()
     return templates.TemplateResponse(
+        request,
         "meetings/meetings_list.html",
         {"request": request, "meetings": meetings}
     )
@@ -30,6 +31,7 @@ async def meeting_create_form(request: Request, db: AsyncSession = Depends(get_a
     result = await db.execute(select(User))
     users = result.scalars().all()
     return templates.TemplateResponse(
+        request,
         "meetings/meeting_create.html",
         {"request": request, "users": users}
     )
@@ -65,6 +67,7 @@ async def meeting_create(
     db.add(meeting)
     await db.commit()
     return templates.TemplateResponse(
+        request,
         "meetings/meeting_created.html",
         {"request": request, "meeting": meeting, "users": users}
     )
@@ -78,6 +81,7 @@ async def meeting_edit_form(request: Request, meeting_id: int, db: AsyncSession 
     users = result.scalars().all()
 
     return templates.TemplateResponse(
+        request,
         "meetings/meeting_edit.html",
         {"request": request, "meeting": meeting, "users": users}
     )

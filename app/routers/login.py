@@ -12,7 +12,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.get("/login")
 async def login_form(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
+    return templates.TemplateResponse(request, "login.html", {"request": request})
 
 
 @router.post("/login")

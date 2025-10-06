@@ -20,6 +20,7 @@ async def teams_list(request: Request, db: AsyncSession = Depends(get_async_db))
     )
     teams = result.scalars().all()
     return templates.TemplateResponse(
+        request,
         "teams/teams_list.html",
         {"request": request, "teams": teams}
     )
@@ -33,6 +34,7 @@ async def team_create_form(request: Request, db: AsyncSession = Depends(get_asyn
     result = await db.execute(select(User))
     users = result.scalars().all()
     return templates.TemplateResponse(
+        request,
         "teams/team_create.html",
         {"request": request, "users": users}
     )
@@ -59,6 +61,7 @@ async def team_create(
     db.add(team)
     await db.commit()
     return templates.TemplateResponse(
+        request,
         "teams/team_created.html",
         {"request": request, "team": team}
     )
@@ -72,6 +75,7 @@ async def team_edit_form(request: Request, team_id: int, db: AsyncSession = Depe
     users = result.scalars().all()
 
     return templates.TemplateResponse(
+        request,
         "teams/team_edit.html",
         {"request": request, "team": team, "users": users}
     )

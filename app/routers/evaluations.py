@@ -60,6 +60,7 @@ async def evaluations_list(request: Request, db: AsyncSession = Depends(get_asyn
         evaluations = result.scalars().all()
 
     return templates.TemplateResponse(
+        request,
         "evaluations/evaluations_list.html",
         {"request": request, "evaluations": evaluations, "current_user": current_user}
     )
@@ -85,6 +86,7 @@ async def evaluation_create_form(request: Request, db: AsyncSession = Depends(ge
     users = result_users.scalars().all()
 
     return templates.TemplateResponse(
+        request,
         "evaluations/evaluation_create.html",
         {"request": request, "tasks": tasks, "users": users}
     )
@@ -96,7 +98,6 @@ async def evaluation_created(
         score: int = Form(..., ge=1, le=5),
         task_title: str = Form(...),
         user_name: str = Form(...),
-        # evaluator_name: str = Form(...),
         db: AsyncSession = Depends(get_async_db),
         current_user: User = Depends(get_current_user)
 ):
@@ -111,9 +112,6 @@ async def evaluation_created(
 
     result_user = await db.execute(select(User).where(User.name == user_name))
     user = result_user.scalars().first()
-
-    # result_evaluator = await db.execute(select(User).where(User.name == evaluator_name))
-    # evaluator = result_evaluator.scalars().first()
 
     if current_user.role == "user":
         return HTMLResponse("User не может ставить оценки", status_code=403)
@@ -132,7 +130,6 @@ async def evaluation_created(
 
     evaluation = Evaluation(
         score=score,
-        # created_at=datetime.now(),
         task_id=task.id,
         user_id=user.id,
         evaluator_id=current_user.id
@@ -141,6 +138,7 @@ async def evaluation_created(
     await db.commit()
 
     return templates.TemplateResponse(
+        request,
         "evaluations/evaluation_created.html",
         {"request": request, "evaluation": evaluation}
     )
@@ -154,6 +152,7 @@ async def evaluation_edit_form(request: Request, evaluation_id: int, db: AsyncSe
     users = result_users.scalars().all()
 
     return templates.TemplateResponse(
+        request,
         "evaluations/evaluation_edit.html",
         {"request": request, "evaluation": evaluation, "users": users}
     )
@@ -164,22 +163,11 @@ async def evaluation_edit(
         request: Request,
         evaluation_id: int,
         score: int = Form(..., ge=1, le=5),
-        # user_name: str = Form(...),
-        # evaluator_name: str = Form(...),
         db: AsyncSession = Depends(get_async_db)
 ):
     evaluation = await db.get(Evaluation, evaluation_id)
 
-    # result_user = await db.execute(select(User).where(User.name == user_name))
-    # user = result_user.scalars().first()
-    #
-    # result_evaluator = await db.execute(select(User).where(User.name == evaluator_name))
-    # evaluator = result_evaluator.scalars().first()
-
     evaluation.score = score
-    # evaluation.created_at = datetime.now()
-    # evaluation.user_id = user.id
-    # evaluation.evaluator_id = evaluator.id
 
     await db.commit()
     return RedirectResponse(url="/evaluations", status_code=status.HTTP_303_SEE_OTHER)

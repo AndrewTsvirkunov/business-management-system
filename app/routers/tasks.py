@@ -49,6 +49,7 @@ async def tasks_list(request: Request, db: AsyncSession = Depends(get_async_db),
         tasks = result.scalars().all()
 
     return templates.TemplateResponse(
+        request,
         "tasks/tasks_list.html",
         {"request": request, "tasks": tasks, "current_user": current_user}
     )
@@ -70,6 +71,7 @@ async def task_create_form(request: Request, db: AsyncSession = Depends(get_asyn
         users = result_users.scalars().all()
 
     return templates.TemplateResponse(
+        request,
         "tasks/task_create.html",
         {"request": request, "users": users, "current_user": current_user}
     )
@@ -115,6 +117,7 @@ async def task_create(
 
     await db.commit()
     return templates.TemplateResponse(
+        request,
         "tasks/task_created.html",
         {"request": request, "task": task, "users": users, "current_user": current_user}
     )
@@ -135,6 +138,7 @@ async def task_edit_form(request: Request, task_id: int, db: AsyncSession = Depe
     users = result_users.scalars().all()
 
     return templates.TemplateResponse(
+        request,
         "tasks/task_edit.html",
         {"request": request, "task": task, "users": users, "current_user": current_user}
     )
@@ -187,6 +191,7 @@ async def task_delete(task_id: int, db: AsyncSession = Depends(get_async_db),
 @router.get("/comment/{task_id}")
 async def add_comment_form(request: Request, task_id: int):
     return templates.TemplateResponse(
+        request,
         "tasks/add_comment.html",
         {"request": request}
     )
