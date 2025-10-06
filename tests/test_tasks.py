@@ -5,8 +5,13 @@ from datetime import datetime, timedelta
 from app.main import app
 from app.auth import get_current_user
 
+
 @pytest.mark.asyncio
 async def test_tasks_list(client: AsyncClient, admin_user):
+    """
+    Тест отображения списка задач.
+    Проверяет, что GET-запрос на /tasks/ возвращает статус 200 и содержит HTML.
+    """
     app.dependency_overrides[get_current_user] = lambda: admin_user
 
     response = await client.get("/tasks/")
@@ -16,11 +21,12 @@ async def test_tasks_list(client: AsyncClient, admin_user):
     app.dependency_overrides.clear()
 
 
-# ---------------------------
-# GET /tasks/create — форма создания
-# ---------------------------
 @pytest.mark.asyncio
 async def test_task_create_form_admin(client, admin_user):
+    """
+    Тест отображения формы создания задачи для администратора.
+    Проверяет, что GET-запрос на /tasks/create возвращает статус 200 и HTML.
+    """
     app.dependency_overrides[get_current_user] = lambda: admin_user
 
     response = await client.get("/tasks/create")
@@ -32,6 +38,10 @@ async def test_task_create_form_admin(client, admin_user):
 
 @pytest.mark.asyncio
 async def test_task_create_form_forbidden(client, normal_user):
+    """
+    Тест запрета создания задачи для обычного пользователя.
+    Проверяет, что GET-запрос на /tasks/create возвращает 403 и соответствующее сообщение.
+    """
     app.dependency_overrides[get_current_user] = lambda: normal_user
 
     response = await client.get("/tasks/create")
@@ -41,11 +51,12 @@ async def test_task_create_form_forbidden(client, normal_user):
     app.dependency_overrides.clear()
 
 
-# ---------------------------
-# POST /tasks/create — создание задачи
-# ---------------------------
 @pytest.mark.asyncio
 async def test_task_create_post(client, admin_user):
+    """
+    Тест создания новой задачи через POST-запрос.
+    Проверяет, что задача создается с заданными данными и возвращается HTML с названием задачи.
+    """
     app.dependency_overrides[get_current_user] = lambda: admin_user
 
     deadline = (datetime.now() + timedelta(days=1)).isoformat()
@@ -66,14 +77,14 @@ async def test_task_create_post(client, admin_user):
     app.dependency_overrides.clear()
 
 
-# ---------------------------
-# GET /tasks/edit/{task_id} — форма редактирования
-# ---------------------------
 @pytest.mark.asyncio
 async def test_task_edit_form(client, admin_user):
+    """
+    Тест отображения формы редактирования задачи.
+    Проверяет, что GET-запрос на /tasks/edit/{id} возвращает HTML для администратора.
+    """
     app.dependency_overrides[get_current_user] = lambda: admin_user
 
-    # Создаём задачу для редактирования
     deadline = (datetime.now() + timedelta(days=1)).isoformat()
     await client.post(
         "/tasks/create",
@@ -94,11 +105,12 @@ async def test_task_edit_form(client, admin_user):
     app.dependency_overrides.clear()
 
 
-# ---------------------------
-# POST /tasks/edit/{task_id} — редактирование задачи
-# ---------------------------
 @pytest.mark.asyncio
 async def test_task_edit_post(client, admin_user):
+    """
+    Тест редактирования существующей задачи через POST-запрос.
+    Проверяет, что изменения сохраняются и возвращается редирект на /tasks.
+    """
     app.dependency_overrides[get_current_user] = lambda: admin_user
 
     deadline = (datetime.now() + timedelta(days=1)).isoformat()
@@ -131,11 +143,12 @@ async def test_task_edit_post(client, admin_user):
     app.dependency_overrides.clear()
 
 
-# ---------------------------
-# GET /tasks/delete/{task_id} — удаление задачи
-# ---------------------------
 @pytest.mark.asyncio
 async def test_task_delete(client, admin_user):
+    """
+    Тест удаления задачи.
+    Проверяет, что GET-запрос на /tasks/delete/{id} удаляет задачу и возвращает статус 200.
+    """
     app.dependency_overrides[get_current_user] = lambda: admin_user
 
     deadline = (datetime.now() + timedelta(days=1)).isoformat()
@@ -155,33 +168,3 @@ async def test_task_delete(client, admin_user):
     assert response.status_code == 200
 
     app.dependency_overrides.clear()
-
-
-# ---------------------------
-# POST /tasks/comment/{task_id} — добавление комментария
-# ---------------------------
-# @pytest.mark.asyncio
-# async def test_task_add_comment(client, admin_user):
-#     app.dependency_overrides[get_current_user] = lambda: admin_user
-#
-#     deadline = (datetime.now() + timedelta(days=1)).isoformat()
-#     await client.post(
-#         "/tasks/create",
-#         data={
-#             "title": "TaskWithComment",
-#             "description": "",
-#             "task_status": "open",
-#             "deadline": deadline,
-#             "user_ids": [admin_user.id],
-#             "first_comment": ""
-#         }
-#     )
-#
-#     response = await client.post(
-#         "/tasks/comment/1",
-#         data={"content": "Новый комментарий"}
-#     )
-#     assert response.status_code == 303
-#     assert response.headers["location"] == "/tasks"
-#
-#     app.dependency_overrides.clear()

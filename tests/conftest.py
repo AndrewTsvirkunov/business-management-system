@@ -60,11 +60,15 @@ async def client(session: AsyncSession):
     app.dependency_overrides.clear()
 
 
-# ---------------------------
-# Фикстура для admin пользователя
-# ---------------------------
 @pytest_asyncio.fixture
 async def admin_user(prepare_database):
+    """
+    Асинхронная фикстура для создания пользователя с ролью 'admin' в тестовой БД.
+    Args:
+        prepare_database: фикстура, подготавливающая тестовую базу данных
+    Yields:
+        User: объект пользователя с ролью 'admin'
+    """
     async with async_session_test() as session:
         email = f"admin_{uuid.uuid4().hex}@example.com"
         user = User(name="Admin", email=email, hashed_password="hashed", role="admin")
@@ -73,11 +77,16 @@ async def admin_user(prepare_database):
         await session.refresh(user)
         yield user
 
-# ---------------------------
-# Фикстура для обычного пользователя
-# ---------------------------
+
 @pytest_asyncio.fixture
 async def normal_user(prepare_database):
+    """
+    Асинхронная фикстура для создания обычного пользователя с ролью 'user' в тестовой БД.
+    Args:
+        prepare_database: фикстура, подготавливающая тестовую базу данных
+    Yields:
+        User: объект пользователя с ролью 'user'
+    """
     async with async_session_test() as session:
         email = f"admin_{uuid.uuid4().hex}@example.com"
         user = User(name="User", email=email,  hashed_password="hashed", role="user")

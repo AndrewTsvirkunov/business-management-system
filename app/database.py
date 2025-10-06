@@ -9,6 +9,12 @@ async_session = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_c
 
 
 async def get_async_db() -> AsyncSession:
+    """
+    Асинхронная зависимость для получения сессии базы данных.
+    Используется как Depends в FastAPI эндпоинтах.
+    Yields:
+        AsyncSession: Асинхронная сессия SQLAlchemy.
+    """
     async with async_session() as session:
         yield session
 

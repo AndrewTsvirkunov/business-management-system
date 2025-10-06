@@ -24,5 +24,12 @@ app.include_router(calendar.router)
 
 @app.get("/")
 async def index(request: Request):
+    """
+    Отображает главную страницу.
+    Args:
+        request (Request): Объект запроса FastAPI
+    Returns:
+        HTMLResponse: Шаблон "index.html"
+    """
     today = date.today()
     return templates.TemplateResponse("index.html", {"request": request, "today": today})

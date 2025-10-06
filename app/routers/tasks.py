@@ -17,6 +17,17 @@ router = APIRouter(prefix="/tasks", tags=["tasks"])
 @router.get("/")
 async def tasks_list(request: Request, db: AsyncSession = Depends(get_async_db),
                      current_user: User = Depends(get_current_user)):
+    """
+    Отображает список задач в зависимости от роли пользователя.
+    Admin видит все задачи, менеджер - только задачи своих команд,
+    пользователь - только свои.
+    Args:
+        request (Request): Текущий HTTP-запрос
+        db (AsyncSession): Асинхронная сессия базы данных
+        current_user (User): Текущий авторизованный пользователь
+    Returns:
+        HTMLResponse: Страница со списком задач
+    """
     if current_user.role == "admin":
         result = await db.execute(
             select(Task)
@@ -58,6 +69,16 @@ async def tasks_list(request: Request, db: AsyncSession = Depends(get_async_db),
 @router.get("/create")
 async def task_create_form(request: Request, db: AsyncSession = Depends(get_async_db),
                            current_user: User = Depends(get_current_user)):
+    """
+    Отображает форму создания новой задачи.
+    Доступно только для администратора и менеджера.
+    Args:
+        request (Request): Текущий HTTP-запрос
+        db (AsyncSession): Асинхронная сессия базы данных
+        current_user (User): Текущий пользователь
+    Returns:
+        HTMLResponse: Страница с формой создания задачи
+    """
     if current_user.role == "user":
         raise HTTPException(status_code=403, detail="User не может создавать задачу")
 
@@ -89,6 +110,23 @@ async def task_create(
         db: AsyncSession = Depends(get_async_db),
         current_user: User = Depends(get_current_user)
 ):
+    """
+    Обрабатывает создание новой задачи и первого комментария.
+    Проверяет права доступа, добавляет задачу с указанными пользователями
+    и при необходимости создаёт комментарий.
+    Args:
+        request (Request): Текущий HTTP-запрос
+        title (str): Название задачи
+        description (str): Описание задачи
+        task_status (str): Статус задачи
+        deadline (str): Срок выполнения в ISO-формате
+        user_ids (list[int]): Список пользователей, назначенных на задачу
+        first_comment (str): Текст первого комментария
+        db (AsyncSession): Асинхронная сессия базы данных
+        current_user (User): Текущий пользователь
+    Returns:
+        HTMLResponse: Страница с подтверждением создания задачи
+    """
     if current_user.role == "user":
         raise HTTPException(status_code=403, detail="User не может создавать задачу")
 
@@ -126,6 +164,18 @@ async def task_create(
 @router.get("/edit/{task_id}")
 async def task_edit_form(request: Request, task_id: int, db: AsyncSession = Depends(get_async_db),
                          current_user: User = Depends(get_current_user)):
+    """
+    Отображает форму редактирования задачи.
+    Проверяет права доступа - редактировать могут только
+    администратор, менеджер или участник задачи.
+    Args:
+        request (Request): Текущий HTTP-запрос.
+        task_id (int): ID задачи.
+        db (AsyncSession): Асинхронная сессия базы данных.
+        current_user (User): Текущий пользователь.
+    Returns:
+        HTMLResponse: Страница с формой редактирования задачи.
+    """
     result_task = await db.execute(
         select(Task).options(selectinload(Task.users)).where(Task.id == task_id)
     )
@@ -156,6 +206,22 @@ async def task_edit(
         db: AsyncSession = Depends(get_async_db),
         current_user: User = Depends(get_current_user)
 ):
+    """
+    Обновляет информацию о задаче по её ID.
+    Проверяет права, изменяет поля задачи и назначенных пользователей.
+    Args:
+        request (Request): Текущий HTTP-запрос
+        task_id (int): ID задачи
+        title (str): Новое название
+        description (str): Новое описание
+        task_status (str): Новый статус
+        deadline (str): Новая дата в ISO-формате
+        user_ids (list[int]): Обновлённый список участников
+        db (AsyncSession): Асинхронная сессия базы данных
+        current_user (User): Текущий пользователь
+    Returns:
+        RedirectResponse: Перенаправление на список задач
+    """
     result_task = await db.execute(
         select(Task).options(selectinload(Task.users)).where(Task.id == task_id))
     task = result_task.scalars().first()
@@ -178,6 +244,17 @@ async def task_edit(
 @router.get("/delete/{task_id}")
 async def task_delete(task_id: int, db: AsyncSession = Depends(get_async_db),
                       current_user: User = Depends(get_current_user)):
+    """
+    Удаляет задачу по ID.
+    Проверяет, что пользователь имеет права (админ, менеджер
+    или участник задачи).
+    Args:
+        task_id (int): ID задачи
+        db (AsyncSession): Асинхронная сессия базы данных
+        current_user (User): Текущий пользователь
+    Returns:
+        HTMLResponse: Сообщение об успешном удалении задачи
+    """
     task = await db.get(Task, task_id)
 
     if current_user.role != "admin" and current_user not in task.users and current_user.role != "manager":
@@ -190,6 +267,14 @@ async def task_delete(task_id: int, db: AsyncSession = Depends(get_async_db),
 
 @router.get("/comment/{task_id}")
 async def add_comment_form(request: Request, task_id: int):
+    """
+    Отображает форму добавления комментария к задаче.
+    Args:
+        request (Request): Текущий HTTP-запрос
+        task_id (int): ID задачи
+    Returns:
+        HTMLResponse: Страница с формой добавления комментария
+    """
     return templates.TemplateResponse(
         request,
         "tasks/add_comment.html",
@@ -204,6 +289,16 @@ async def add_comment(
         db: AsyncSession = Depends(get_async_db),
         current_user: User = Depends(get_current_user)
 ):
+    """
+    Добавляет комментарий к задаче.
+    Args:
+        task_id (int): ID задачи
+        content (str): Текст комментария
+        db (AsyncSession): Асинхронная сессия базы данных
+        current_user (User): Автор комментария
+    Returns:
+        RedirectResponse: Перенаправление на список задач
+    """
     comment = TaskComment(content=content, task_id=task_id, user_id=current_user.id)
     db.add(comment)
     await db.commit()

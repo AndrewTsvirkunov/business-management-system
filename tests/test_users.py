@@ -4,6 +4,11 @@ from httpx import AsyncClient
 
 @pytest.mark.asyncio
 async def test_register_user(client: AsyncClient):
+    """
+    Тест регистрации нового пользователя через POST-запрос.
+    Проверяет, что пользователь создается с указанным именем и email,
+    и возвращается статус 201.
+    """
     response = await client.post(
         "/users/register",
         json={
@@ -20,7 +25,11 @@ async def test_register_user(client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_token_fail(client: AsyncClient):
-    # Пытаемся войти с неправильными данными
+    """
+    Тест получения токена с неправильными данными.
+    Проверяет, что при попытке входа с неверным email или паролем
+    возвращается статус 401 и соответствующее сообщение.
+    """
     response = await client.post(
         "/users/token",
         data={"username": "wrong@example.com", "password": "wrong"}

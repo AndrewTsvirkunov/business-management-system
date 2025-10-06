@@ -14,6 +14,15 @@ router = APIRouter(prefix="/calendar", tags=["calendar"])
 
 @router.get("/day/{day}", response_class=HTMLResponse)
 async def day_view(request: Request, day: date, db: AsyncSession = Depends(get_async_db)):
+    """
+    Отображает календарь задач и встреч за конкретный день.
+    Args:
+        request (Request): Текущий HTTP-запрос
+        day (date): Дата для просмотра
+        db (AsyncSession): Асинхронная сессия базы данных
+    Returns:
+        HTMLResponse: Страница с задачами и встречами за выбранный день
+    """
     result_tasks = await db.execute(select(Task).where(func.date(Task.deadline) == day))
     tasks = result_tasks.scalars().all()
 
@@ -31,6 +40,16 @@ async def day_view(request: Request, day: date, db: AsyncSession = Depends(get_a
 
 @router.get("/month/{year}/{month}")
 async def month_view(request: Request, year: int, month: int, db: AsyncSession = Depends(get_async_db)):
+    """
+    Отображает календарь задач и встреч за указанный месяц.
+    Args:
+        request (Request): Текущий HTTP-запрос
+        year (int): Год для отображения
+        month (int): Месяц для отображения
+        db (AsyncSession): Асинхронная сессия базы данных
+    Returns:
+        HTMLResponse: Страница с календарем на месяц и событиями по дням
+    """
     start_date = date(year, month, 1)
     if month == 12:
         end_date = date(year+1, 1, 1)

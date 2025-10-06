@@ -1,9 +1,8 @@
-from fastapi import APIRouter, Depends, status, HTTPException, Request, Form
+from fastapi import APIRouter, Depends, status, Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from sqlalchemy import select
-from datetime import datetime
 
 from app.models import Evaluation, User, Task, Team
 from app.database import get_async_db
@@ -17,6 +16,19 @@ router = APIRouter(prefix="/evaluations", tags=["evaluations"])
 @router.get("/")
 async def evaluations_list(request: Request, db: AsyncSession = Depends(get_async_db),
                            current_user: User = Depends(get_current_user)):
+    """
+    Отображает список всех оценок, доступных текущему пользователю.
+    Для:
+    - администратора: все оценки;
+    - менеджера: оценки пользователей из его команд;
+    - пользователя: только собственные оценки.
+    Args:
+        request (Request): Текущий HTTP-запрос
+        db (AsyncSession): Асинхронная сессия базы данных
+        current_user (User): Текущий авторизованный пользователь
+    Returns:
+        HTMLResponse: Страница со списком оценок
+    """
     if current_user.role == "admin":
         result = await db.execute(
             select(Evaluation).options(
@@ -69,6 +81,16 @@ async def evaluations_list(request: Request, db: AsyncSession = Depends(get_asyn
 @router.get("/create")
 async def evaluation_create_form(request: Request, db: AsyncSession = Depends(get_async_db),
                                  current_user: User = Depends(get_current_user)):
+    """
+    Отображает форму для создания новой оценки.
+    Доступно только администраторам и менеджерам.
+    Args:
+        request (Request): Текущий HTTP-запрос
+        db (AsyncSession): Асинхронная сессия базы данных
+        current_user (User): Текущий пользователь
+    Returns:
+        HTMLResponse: Страница с формой создания оценки
+    """
     result_tasks = await db.execute(select(Task))
     tasks = result_tasks.scalars().all()
 
@@ -101,6 +123,21 @@ async def evaluation_created(
         db: AsyncSession = Depends(get_async_db),
         current_user: User = Depends(get_current_user)
 ):
+    """
+    Обрабатывает отправку формы создания оценки.
+    Проверяет, что задача завершена, пользователь назначен на неё,
+    и что оценку может ставить только менеджер или администратор.
+    Args:
+        request (Request): Текущий HTTP-запрос
+        score (int): Оценка от 1 до 5
+        task_title (str): Название оцениваемой задачи
+        user_name (str): Имя оцениваемого пользователя
+        db (AsyncSession): Асинхронная сессия базы данных
+        current_user (User): Текущий пользователь
+    Returns:
+        HTMLResponse | TemplateResponse: Страница с подтверждением
+        или сообщение об ошибке
+    """
     result_task = await db.execute(select(Task).where(Task.title == task_title))
     task = result_task.scalars().first()
 
@@ -146,6 +183,15 @@ async def evaluation_created(
 
 @router.get("/edit/{evaluation_id}")
 async def evaluation_edit_form(request: Request, evaluation_id: int, db: AsyncSession = Depends(get_async_db)):
+    """
+    Отображает форму редактирования оценки.
+    Args:
+        request (Request): Текущий HTTP-запрос
+        evaluation_id (int): Идентификатор редактируемой оценки
+        db (AsyncSession): Асинхронная сессия базы данных
+    Returns:
+        HTMLResponse: Страница с формой редактирования оценки
+    """
     evaluation = await db.get(Evaluation, evaluation_id)
 
     result_users = await db.execute(select(User))
@@ -165,6 +211,16 @@ async def evaluation_edit(
         score: int = Form(..., ge=1, le=5),
         db: AsyncSession = Depends(get_async_db)
 ):
+    """
+    Обновляет значение оценки по заданному идентификатору.
+    Args:
+        request (Request): Текущий HTTP-запрос
+        evaluation_id (int): ID оценки для обновления
+        score (int): Новое значение оценки (1–5)
+        db (AsyncSession): Асинхронная сессия базы данных
+    Returns:
+        RedirectResponse: Перенаправление на список оценок
+    """
     evaluation = await db.get(Evaluation, evaluation_id)
 
     evaluation.score = score
@@ -175,6 +231,14 @@ async def evaluation_edit(
 
 @router.get("/delete/{evaluation_id}")
 async def evaluation_delete(evaluation_id: int, db: AsyncSession = Depends(get_async_db)):
+    """
+    Удаляет оценку по идентификатору.
+    Args:
+        evaluation_id (int): ID оценки для удаления
+        db (AsyncSession): Асинхронная сессия базы данных
+    Returns:
+        HTMLResponse: Сообщение об успешном удалении оценки
+    """
     evaluation = await db.get(Evaluation, evaluation_id)
     await db.delete(evaluation)
     await db.commit()

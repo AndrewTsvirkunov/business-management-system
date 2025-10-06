@@ -7,16 +7,21 @@ from app.auth import get_current_user
 
 @pytest.mark.asyncio
 async def test_meetings_list(client: AsyncClient):
+    """
+    Тест отображения списка встреч.
+    Проверяет, что GET-запрос на /meetings/ возвращает статус 200 и содержит HTML.
+    """
     response = await client.get("/meetings/")
     assert response.status_code == 200
     assert "<html" in response.text
 
 
-# ---------------------------
-# GET /meetings/create — форма создания
-# ---------------------------
 @pytest.mark.asyncio
 async def test_meeting_create_form(client, admin_user):
+    """
+    Тест отображения формы создания встречи.
+    Проверяет, что GET-запрос на /meetings/create возвращает статус 200 и HTML для администратора.
+    """
     app.dependency_overrides[get_current_user] = lambda: admin_user
 
     response = await client.get("/meetings/create")
@@ -26,11 +31,12 @@ async def test_meeting_create_form(client, admin_user):
     app.dependency_overrides.clear()
 
 
-# ---------------------------
-# POST /meetings/create — создание встречи
-# ---------------------------
 @pytest.mark.asyncio
 async def test_meeting_create_post(client, admin_user):
+    """
+    Тест создания новой встречи через POST-запрос.
+    Проверяет, что создается встреча с заданным названием и возвращается HTML с этим названием.
+    """
     app.dependency_overrides[get_current_user] = lambda: admin_user
 
     scheduled_at = (datetime.now() + timedelta(days=1)).isoformat()
@@ -48,14 +54,14 @@ async def test_meeting_create_post(client, admin_user):
     app.dependency_overrides.clear()
 
 
-# ---------------------------
-# GET /meetings/edit/{meeting_id} — форма редактирования
-# ---------------------------
 @pytest.mark.asyncio
 async def test_meeting_edit_form(client, admin_user):
+    """
+    Тест отображения формы редактирования встречи.
+    Проверяет, что GET-запрос на /meetings/edit/{id} возвращает статус 200 и HTML.
+    """
     app.dependency_overrides[get_current_user] = lambda: admin_user
 
-    # Создаем встречу для редактирования
     scheduled_at = (datetime.now() + timedelta(days=1)).isoformat()
     await client.post(
         "/meetings/create",
@@ -65,7 +71,6 @@ async def test_meeting_edit_form(client, admin_user):
             "user_ids": [admin_user.id]
         }
     )
-
     response = await client.get("/meetings/edit/1")
     assert response.status_code == 200
     assert "<html" in response.text
@@ -73,11 +78,12 @@ async def test_meeting_edit_form(client, admin_user):
     app.dependency_overrides.clear()
 
 
-# ---------------------------
-# POST /meetings/edit/{meeting_id} — редактирование встречи
-# ---------------------------
 @pytest.mark.asyncio
 async def test_meeting_edit_post(client, admin_user):
+    """
+    Тест редактирования существующей встречи через POST-запрос.
+    Проверяет, что изменения сохраняются и возвращается редирект на /meetings.
+    """
     app.dependency_overrides[get_current_user] = lambda: admin_user
 
     scheduled_at = (datetime.now() + timedelta(days=1)).isoformat()
@@ -89,7 +95,6 @@ async def test_meeting_edit_post(client, admin_user):
             "user_ids": [admin_user.id]
         }
     )
-
     new_scheduled_at = (datetime.now() + timedelta(days=2)).isoformat()
     response = await client.post(
         "/meetings/edit/1",
@@ -105,11 +110,12 @@ async def test_meeting_edit_post(client, admin_user):
     app.dependency_overrides.clear()
 
 
-# ---------------------------
-# GET /meetings/delete/{meeting_id} — удаление встречи
-# ---------------------------
 @pytest.mark.asyncio
 async def test_meeting_delete(client, admin_user):
+    """
+    Тест удаления встречи.
+    Проверяет, что GET-запрос на /meetings/delete/{id} удаляет встречу и возвращает статус 200.
+    """
     app.dependency_overrides[get_current_user] = lambda: admin_user
 
     scheduled_at = (datetime.now() + timedelta(days=1)).isoformat()
@@ -121,7 +127,6 @@ async def test_meeting_delete(client, admin_user):
             "user_ids": [admin_user.id]
         }
     )
-
     response = await client.get("/meetings/delete/1")
     assert response.status_code == 200
 
